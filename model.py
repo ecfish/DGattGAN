@@ -358,7 +358,7 @@ class Generator(nn.Module):
             BinaryLayer(init_features) for i in range(self.progressive_num)
         )
 
-    def forward(self, z, t, w, w_mask, bgnoise):
+    def forward(self, z, t, w, w_mask):
         obs         = []
         ob_masks    = []
         fake_images = []
@@ -366,7 +366,7 @@ class Generator(nn.Module):
         s, mu, log_var = self.ca(t)
         
         bg_code = self.bg_fc(torch.cat((z,self.bg_dropout(s)), dim=1)).view(-1, self.base_features, 4, 4)
-        ob_code = self.ob_fc(torch.cat((bgnoise,s), dim=1)).view(-1, self.base_features, 4, 4)
+        ob_code = self.ob_fc(torch.cat((z,s), dim=1)).view(-1, self.base_features, 4, 4)
 
         # co-upsample to 64x64
         for co_upsampler in self.init_co_upsamplers:
@@ -391,7 +391,7 @@ class Generator(nn.Module):
             if i < self.progressive_num - 1:
                 ob_code = self.ob_pro_upsamplers[i](ob_code, w, w_mask)
 
-        return bg_image, fake_images, ob_masks, mu, log_var, obs
+        return bg_image, fake_images, ob_masks, mu, log_var
 
 '''
 class Generator(nn.Module):
