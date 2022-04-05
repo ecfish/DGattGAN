@@ -213,7 +213,7 @@ class FineGAN_trainer(object):
         # background
         bf_score, rf_score = netBGD(bg_img)
         real_labels = torch.ones_like(bf_score)
-        errG_total += nn.BCELoss(reduce=False)(rf_score, real_labels) * cfg.TRAIN.BG_LOSS_WT + nn.BCELoss(reduce=False)(bf_score, real_labels)
+        errG_total += nn.BCELoss()(rf_score, real_labels) * cfg.TRAIN.BG_LOSS_WT + nn.BCELoss()(bf_score, real_labels)
 
         # object
         for i in range(len(netDs)):
