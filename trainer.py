@@ -213,7 +213,7 @@ class FineGAN_trainer(object):
         # background
         bf_score, rf_score = netBGD(bg_img)
         real_labels = torch.ones_like(bf_score)
-        errG_total += nn.BCELoss()(rf_score, real_labels) * cfg.TRAIN.BG_LOSS_WT + nn.BCELoss()(bf_score, real_labels)
+        errG_total += nn.BCELoss(reduce=False)(rf_score, real_labels) * cfg.TRAIN.BG_LOSS_WT + nn.BCELoss(reduce=False)(bf_score, real_labels)
 
         # object
         for i in range(len(netDs)):
@@ -234,16 +234,16 @@ class FineGAN_trainer(object):
         #with open('optimizers.pkl', 'rb') as f:
         #    self.optimizer_G, self.optimizer_BGD, self.optimizer_Ds = pickle.load(f)
 
-        #noise = Variable(torch.FloatTensor(self.batch_size, 256))
+        noise = Variable(torch.FloatTensor(self.batch_size, 256))
         self.match_labels = Variable(torch.LongTensor(range(self.batch_size)))
 
         if cfg.CUDA:
-            #noise = noise.cuda()
+            noise = noise.cuda()
             image_encoder = image_encoder.cuda()
             text_encoder = text_encoder.cuda()
             self.match_labels = self.match_labels.cuda()
 
-        print("Starting normal boGAN training..")
+        print("Starting normal DGattGAN training..")
         count = start_count
         start_epoch = start_count // (self.num_batches)
 
@@ -272,8 +272,8 @@ class FineGAN_trainer(object):
                 mask = mask.cuda()
 
                 # Feedforward through Generator. Obtain stagewise fake images
-                #noise.data.normal_(0, 1)
-                bg_image, fake_images, ob_masks, NI_obs, NI_masks, mu, log_var = self.netG(1, sent_emb, words_embs, mask)
+                noise.data.normal_(0, 1)
+                bg_image, fake_images, ob_masks, mu, log_var = self.netG(noise, sent_emb, words_embs, mask)
                 
                 self.fake_imgs.extend(fake_images)
 
@@ -317,7 +317,7 @@ class FineGAN_trainer(object):
                     self.netG.eval()
 
                     with torch.set_grad_enabled(False):
-                        bg_image, fake_images, ob_masks, NI_obs, NI_masks, mu, log_var = self.netG(1, sent_emb, words_embs, mask)
+                        bg_image, fake_images, ob_masks, mu, log_var = self.netG(noise, sent_emb, words_embs, mask)
                         self.fake_imgs.extend([bg_image])
                         self.fake_imgs.extend(fake_images)
                         self.fake_imgs.extend(ob_masks)
