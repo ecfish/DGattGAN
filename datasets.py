@@ -377,7 +377,7 @@ class BirdTextDataset(data.Dataset):
             warped_x2 = flipped_x2
 
         fimg = normalize(fimg)
-        mask = torch.zeros_like(fimg)
+        mask = torch.zeros(1, crop_width, crop_width)
         mask[:, int(warped_y1):int(warped_y2), int(warped_x1):int(warped_x2)] = 1.0
 
         #warped_bbox = np.array([warped_y1, warped_x1, warped_y2, warped_x2], dtype=np.float)
@@ -562,7 +562,7 @@ class BirdTextDataset(data.Dataset):
 
         text_index = index * 10 + sentence_id
         text, text_len = self.get_caption(text_index)
-        return fimg, cimgs, text, text_len, cimgsx64, object_mask, key, sentence_id, cls_id
+        return fimg, cimgs, text, text_len, cimgsx64, object_mask
 
     def __len__(self):
         return len(self.filenames)
